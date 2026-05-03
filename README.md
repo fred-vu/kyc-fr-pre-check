@@ -72,6 +72,30 @@ All demo company names are fictional.
 - **i18n layer** uses a lightweight English/French dictionary and a language cookie.
 - **Verification** combines Vitest unit/integration tests and Playwright production smoke tests.
 
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+  User[Analyst or reviewer] --> UI[Next.js UI]
+  UI --> API[API routes]
+  API --> KYC[KYC pre-check orchestrator]
+
+  KYC --> Validation[SIREN/SIRET validation]
+  KYC --> Company[Company profile resolver]
+  KYC --> Screening[Screening engine]
+  KYC --> Risk[Risk scoring and red flags]
+  KYC --> Report[Markdown and PDF report output]
+
+  Company --> Demo[Demo fixtures]
+  Company --> Annuaire[Annuaire des Entreprises]
+  Screening --> DGTresor[DG Tresor local snapshot]
+  Screening --> AMF[AMF warning-list dataset]
+
+  KYC -. V2 .-> Cases[(Saved checks and case database)]
+  Cases -. V2 .-> Audit[Audit trail and analyst notes]
+  Cases -. V2 .-> Auth[Authenticated reviewer workspace]
+```
+
 ## Data Sources
 
 V1 source priority:
@@ -168,10 +192,56 @@ Known limitations:
 - No authentication, audit trail, case assignment, or evidence storage is included in this MVP.
 - Beneficial ownership, PEP screening, adverse media, and document verification are out of scope.
 
-## Future Improvements
+## V2 Roadmap
 
-- Batch company checks.
-- Authentication and audit trail.
+V2 should move the project from a demo-first pre-check into a trust-first review workflow. The next version should preserve the stable demo path while adding persistence, reviewer context, clearer evidence, and operational guardrails.
+
+### V2.1: Production Readiness
+
+- Add a GitHub Actions CI workflow for `typecheck`, `test`, `build`, and Playwright smoke tests.
+- Add a source health view showing DG Tresor snapshot date, AMF dataset status, and live API availability.
+- Improve error states for slow or unavailable public data sources.
+- Version generated reports with app version, generation time, and source freshness metadata.
+
+### V2.2: Saved Checks
+
+- Add a database layer, likely Supabase or Neon Postgres.
+- Persist each pre-check result with identifier, company snapshot, score, screening evidence, report markdown, language, and timestamp.
+- Add a `/checks` history page with search, filters, and result reopening.
+- Keep demo fixtures available so the app remains portfolio-friendly without credentials.
+
+### V2.3: Case Review Workflow
+
+- Add case states: `Draft`, `Needs Review`, `Cleared`, `Escalated`, and `Rejected`.
+- Add analyst notes and decision rationale fields.
+- Add a case detail page with source evidence, generated report, and status history.
+- Add full PDF export per saved case.
+
+### V2.4: Authenticated Workspace
+
+- Add authentication for saved checks and case review, using magic link, GitHub, or Google login.
+- Protect history, case pages, and reviewer notes.
+- Keep a public demo path for portfolio review.
+- Add minimal role separation if the app grows beyond a single reviewer.
+
+### V2.5: Batch Screening
+
+- Add CSV upload for multiple SIREN/SIRET identifiers.
+- Return a review table with status, risk level, screening matches, and source errors.
+- Add CSV export and batch PDF summary.
+- Add queueing or throttling if live enrichment is enabled.
+
+### V2.6: Screening Explainability
+
+- Store matched list entry, normalized query, match score, rule name, and confidence tier.
+- Strengthen name normalization for accents, legal form noise, punctuation, ampersands, quotes, and French association names.
+- Separate exact, strong fuzzy, weak fuzzy, and no-match outcomes.
+- Make every screening indicator explainable in the UI and report.
+
+### Later Candidates
+
 - Beneficial ownership module.
-- Full PDF generation.
-- Dedicated rate limiting service for production deployments.
+- PEP screening.
+- Adverse media signals.
+- Document verification.
+- Dedicated production rate limiting service.
