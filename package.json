@@ -1,0 +1,44 @@
+{
+  "name": "kyc-fr-precheck",
+  "version": "1.0.0",
+  "description": "Demo-first French company KYC pre-check MVP.",
+  "private": true,
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "refresh:dg-tresor": "node scripts/refresh-dg-tresor-snapshot.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "fast-xml-parser": "^5.7.2",
+    "fuse.js": "^7.3.0",
+    "lucide-react": "^1.14.0",
+    "next": "^15.5.15",
+    "papaparse": "^5.5.3",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "zod": "^4.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@types/papaparse": "^5.5.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.5.0",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.4",
+    "postcss": "^8.5.13",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  }
+}
