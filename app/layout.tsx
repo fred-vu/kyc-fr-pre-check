@@ -26,11 +26,11 @@ async function LocalizedLayout({ children }: { children: React.ReactNode }) {
     <html lang={locale}>
       <body className="min-h-screen bg-white text-ink antialiased">
         <header className="no-print bg-white">
-          <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-12">
-            <Link className="text-base font-medium text-ink" href="/">
+          <div className="mx-auto flex min-h-14 max-w-7xl flex-col items-start gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-0 lg:px-12">
+            <Link className="max-w-full text-base font-medium leading-snug text-ink" href="/">
               {dictionary.appName}
             </Link>
-            <nav className="flex items-center gap-3 text-sm font-normal">
+            <nav className="flex w-full flex-wrap items-center gap-x-3 gap-y-2 text-sm font-normal sm:w-auto sm:justify-end">
               <Link className="text-muted" href="/demo">
                 {dictionary.nav.demo}
               </Link>
@@ -43,13 +43,13 @@ async function LocalizedLayout({ children }: { children: React.ReactNode }) {
         </header>
         {children}
         <footer className="no-print border-t border-line bg-white">
-          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-12 text-[13px] leading-6 text-muted sm:px-6 lg:px-12">
+          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-10 text-[13px] leading-6 text-muted sm:px-6 sm:py-12 lg:px-12">
             <p>{dictionary.footer.disclaimer}</p>
             <p>{dictionary.footer.sources}</p>
             <p>
               {dictionary.footer.updated}: {new Date().toLocaleDateString(footerDateLocale)}
             </p>
-            <p className="flex items-center gap-2">
+            <p className="flex flex-wrap items-center gap-2">
               <span>{dictionary.footer.credit}</span>
               <a
                 className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-ink"

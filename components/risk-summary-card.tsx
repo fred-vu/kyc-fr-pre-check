@@ -40,12 +40,12 @@ export function RiskSummaryCard({
 
   return (
     <section
-      className={`print-break-inside-avoid rounded-lg border p-8 ${
+      className={`print-break-inside-avoid rounded-lg border p-5 sm:p-8 ${
         isDark ? "border-dark bg-dark text-white" : "border-line bg-white"
       }`}
     >
       <div className="mb-5 flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <p className={`text-xs font-medium uppercase tracking-[0.05em] ${isDark ? "text-white/60" : "text-muted"}`}>
             {labels.eyebrow}
           </p>

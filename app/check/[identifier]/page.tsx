@@ -23,8 +23,8 @@ export default async function CheckPage({ params }: CheckPageProps) {
   const result = await runPrecheck(decodeURIComponent(identifier), { locale });
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 py-section sm:px-6 lg:px-12">
-      <div className="no-print flex items-center justify-between gap-4">
+    <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:space-y-6 sm:px-6 sm:py-section lg:px-12">
+      <div className="no-print flex flex-wrap items-center justify-between gap-3">
         <Link className="inline-flex items-center gap-2 text-sm font-normal text-muted" href="/">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           {dictionary.check.newCheck}
@@ -45,8 +45,8 @@ export default async function CheckPage({ params }: CheckPageProps) {
         />
       ) : null}
 
-      <div className="print-surface grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <section className="space-y-6">
+      <div className="print-surface grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="min-w-0 space-y-6">
           <CompanyIdentityCard
             company={result.company}
             identifier={result.identifier}
@@ -82,7 +82,7 @@ export default async function CheckPage({ params }: CheckPageProps) {
           />
         </section>
 
-        <aside className="space-y-6">
+        <aside className="min-w-0 space-y-6">
           <RiskSummaryCard
             result={result}
             labels={dictionary.riskSummary}

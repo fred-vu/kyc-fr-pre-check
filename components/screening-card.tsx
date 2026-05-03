@@ -27,14 +27,14 @@ export function ScreeningCard({
           : "border-slate-200 bg-slate-50 text-slate-700";
 
   return (
-    <section className="print-break-inside-avoid rounded-lg border border-line bg-white p-8">
+    <section className="print-break-inside-avoid rounded-lg border border-line bg-white p-5 sm:p-8">
       <div className="mb-5 flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted">{labels.eyebrow}</p>
           <h2 className="mt-2 text-lg font-medium leading-[1.4] text-ink">{title}</h2>
           <p className="mt-1 text-sm leading-[1.55] text-body">{description}</p>
         </div>
-        <SearchCheck className="h-5 w-5 text-ink" aria-hidden="true" />
+        <SearchCheck className="h-5 w-5 flex-none text-ink" aria-hidden="true" />
       </div>
 
       {statusNote ? (

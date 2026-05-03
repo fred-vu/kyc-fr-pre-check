@@ -5,6 +5,8 @@ out
 dist
 coverage
 docs/
+playwright-report/
+test-results/
 .env
 .env*.local
 npm-debug.log*

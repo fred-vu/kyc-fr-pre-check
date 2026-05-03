@@ -21,15 +21,15 @@ export function CompanyIdentityCard({
   labels: AppDictionary["companyIdentity"];
 }) {
   return (
-    <section className="print-break-inside-avoid rounded-lg border border-line bg-white p-8">
+    <section className="print-break-inside-avoid rounded-lg border border-line bg-white p-5 sm:p-8">
       <div className="mb-5 flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted">{labels.eyebrow}</p>
           <h2 className="mt-2 text-lg font-medium leading-[1.4] text-ink">
             {company?.legalName || labels.unavailableTitle}
           </h2>
         </div>
-        <Building2 className="h-6 w-6 text-ink" aria-hidden="true" />
+        <Building2 className="h-6 w-6 flex-none text-ink" aria-hidden="true" />
       </div>
 
       <dl>

@@ -107,8 +107,16 @@ For local refreshes, run `npm run refresh:dg-tresor`.
 ```bash
 npm run typecheck
 npm test
+npm run test:smoke:prod
 npm run build
 npm run refresh:dg-tresor
+```
+
+Production smoke tests default to `https://kyc-fr-pre-check.vercel.app`.
+To run them against another deployment:
+
+```bash
+PLAYWRIGHT_BASE_URL=https://your-preview-url.vercel.app npm run test:smoke:prod
 ```
 
 ## Compliance Disclaimer

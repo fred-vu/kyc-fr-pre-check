@@ -13,7 +13,7 @@ export default async function DemoPage() {
   );
 
   return (
-    <main className="mx-auto max-w-7xl space-y-8 px-4 py-section sm:px-6 lg:px-12">
+    <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:space-y-8 sm:px-6 sm:py-section lg:px-12">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted">{dictionary.demo.eyebrow}</p>
@@ -24,14 +24,14 @@ export default async function DemoPage() {
         </Link>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
         {results.map((result) => (
           <Link
             key={result.company?.siren}
-            className="rounded-lg border border-line bg-white p-8"
+            className="rounded-lg border border-line bg-white p-5 sm:p-8"
             href={`/check/${result.company?.siren}`}
           >
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-3">
               <Building2 className="h-6 w-6 text-ink" aria-hidden="true" />
               <RiskBadge level={result.riskLevel} labels={dictionary.badges.riskLevels} />
             </div>

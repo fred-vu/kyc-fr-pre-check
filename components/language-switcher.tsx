@@ -32,7 +32,7 @@ export function LanguageSwitcher({
         return (
           <button
             key={item}
-            className={`inline-flex h-9 min-w-11 items-center justify-center rounded-md border px-2 text-sm font-medium transition ${
+            className={`inline-flex h-9 min-w-10 items-center justify-center rounded-md border px-2 text-sm font-medium transition sm:min-w-11 ${
               active
                 ? "border-ink bg-panel text-ink"
                 : "border-line bg-white text-muted"

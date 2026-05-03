@@ -78,7 +78,7 @@ export function ReportPreview({
   }
 
   return (
-    <section className="report-print-card print-break-inside-avoid rounded-lg border border-line bg-white p-8">
+    <section className="report-print-card print-break-inside-avoid min-w-0 rounded-lg border border-line bg-white p-5 sm:p-8">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted">{labels.eyebrow}</p>
@@ -105,7 +105,7 @@ export function ReportPreview({
         </button>
       </div>
 
-      <pre className="report-markdown-preview max-h-[520px] overflow-auto whitespace-pre-wrap rounded-md border border-line bg-slate-950 p-4 text-xs leading-6 text-slate-100">
+      <pre className="report-markdown-preview max-h-[60vh] max-w-full overflow-auto whitespace-pre-wrap break-words rounded-md border border-line bg-slate-950 p-4 text-xs leading-6 text-slate-100 sm:max-h-[520px]">
         {markdown}
       </pre>
     </section>

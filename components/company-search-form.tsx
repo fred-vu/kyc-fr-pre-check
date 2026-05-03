@@ -35,7 +35,7 @@ export function CompanySearchForm({ labels }: { labels: AppDictionary["searchFor
         onChange={(event) => setIdentifier(event.target.value)}
       />
       <button
-        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 text-sm font-medium text-white transition active:bg-[#0d1218] focus:outline-none focus:ring-2 focus:ring-accent/40"
+        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 py-3 text-center text-sm font-medium leading-snug text-white transition active:bg-[#0d1218] focus:outline-none focus:ring-2 focus:ring-accent/40"
         type="submit"
       >
         <Search className="h-4 w-4" aria-hidden="true" />
