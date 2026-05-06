@@ -13,8 +13,12 @@ import { buildDgTresorState } from "@/lib/sanctions/dg-tresor-snapshot";
 import { env } from "@/lib/utils/env";
 import { validateIdentifier } from "./validate-identifier";
 import { generateRedFlags } from "./red-flags";
-import { calculateRiskScore, deriveRiskLevel } from "./risk-scoring";
+import { buildRiskScoreBreakdown, calculateRiskScore, deriveRiskLevel } from "./risk-scoring";
 import { generateReportMarkdown } from "./report-generator";
+import { deriveDataMode, normalizeSourceChecks } from "./source-checks";
+import { deriveReviewOutcome } from "./review-outcome";
+import { generateEvidencePayload } from "./evidence-payload";
+import { generateEscalationMemo } from "./escalation-memo";
 
 function skippedSource(sourceName: SourceRecord["sourceName"], notes: string): SourceRecord {
   return {
@@ -37,6 +41,86 @@ function demoDgTresorState(generatedAt: string, locale?: Locale): DgTresorScreen
     indexVersion: 1,
     freshness: "fresh",
     message: dictionary.dgTresorState.demo,
+  };
+}
+
+function buildCaseId(identifier: string, generatedAt: string) {
+  const timestamp = generatedAt.replace(/\D/g, "").slice(0, 14);
+  return `check_${identifier || "invalid"}_${timestamp}`;
+}
+
+function finalizeResult(
+  input: {
+    identifier: KycPrecheckResult["identifier"];
+    company?: CompanyProfile;
+    redFlags: KycPrecheckResult["redFlags"];
+    sanctionsMatches: ScreeningMatch[];
+    warningMatches: ScreeningMatch[];
+    dgTresorState: DgTresorScreeningState;
+    sourcesChecked: SourceRecord[];
+    generatedAt: string;
+    isDemo: boolean;
+  },
+  locale?: Locale,
+): KycPrecheckResult {
+  const riskScore = calculateRiskScore(input.redFlags);
+  const riskLevel = deriveRiskLevel(riskScore);
+  const risk = buildRiskScoreBreakdown(riskScore);
+  const sourceChecks = normalizeSourceChecks({
+    sources: input.sourcesChecked,
+    sanctionsMatches: input.sanctionsMatches,
+    warningMatches: input.warningMatches,
+  });
+  const dataMode = deriveDataMode({ isDemo: input.isDemo, sourceChecks });
+  const reviewOutcome = deriveReviewOutcome({
+    score: riskScore,
+    flags: input.redFlags,
+    sources: sourceChecks,
+  });
+  const caseId = buildCaseId(input.identifier.normalized, input.generatedAt);
+  const evidencePayload = generateEvidencePayload({
+    caseId,
+    inputIdentifier: input.identifier.normalized || input.identifier.raw,
+    generatedAt: input.generatedAt,
+    dataMode,
+    company: input.company,
+    risk,
+    flags: input.redFlags,
+    sources: sourceChecks,
+    reviewOutcome,
+  });
+  const escalationMemo = generateEscalationMemo({
+    company: input.company,
+    inputIdentifier: input.identifier.normalized || input.identifier.raw,
+    reviewOutcome,
+    riskLevel,
+    displayScore: riskScore.display,
+    flags: input.redFlags,
+  });
+  const resultWithoutReport: Omit<KycPrecheckResult, "reportMarkdown"> = {
+    caseId,
+    identifier: input.identifier,
+    company: input.company,
+    dataMode,
+    riskLevel,
+    riskScore,
+    risk,
+    redFlags: input.redFlags,
+    sanctionsMatches: input.sanctionsMatches,
+    warningMatches: input.warningMatches,
+    dgTresorState: input.dgTresorState,
+    sourcesChecked: input.sourcesChecked,
+    sourceChecks,
+    reviewOutcome,
+    evidencePayload,
+    escalationMemo,
+    generatedAt: input.generatedAt,
+    isDemo: input.isDemo,
+  };
+
+  return {
+    ...resultWithoutReport,
+    reportMarkdown: generateReportMarkdown(resultWithoutReport, locale),
   };
 }
 
@@ -87,11 +171,8 @@ export async function runPrecheck(
   const dictionary = getDictionary(options.locale);
 
   if (!identifier.isValid) {
-    const initial: Omit<KycPrecheckResult, "reportMarkdown"> = {
+    const initial = {
       identifier,
-      riskLevel: "unknown",
-      riskScore: { raw: 0, display: 0 },
-      redFlags: [],
       sanctionsMatches: [],
       warningMatches: [],
       dgTresorState: buildDgTresorState({
@@ -110,18 +191,14 @@ export async function runPrecheck(
       sourcesChecked: [],
       locale: options.locale,
     });
-    const riskScore = calculateRiskScore(redFlags);
-    const resultWithoutReport = {
-      ...initial,
-      riskLevel: deriveRiskLevel(riskScore),
-      riskScore,
-      redFlags,
-    };
 
-    return {
-      ...resultWithoutReport,
-      reportMarkdown: generateReportMarkdown(resultWithoutReport, options.locale),
-    };
+    return finalizeResult(
+      {
+      ...initial,
+      redFlags,
+      },
+      options.locale,
+    );
   }
 
   const companyResolution = await resolveCompany(identifier.normalized, options.forceDemo, options.locale);
@@ -139,24 +216,70 @@ export async function runPrecheck(
     const demoMatches = getDemoScreeningMatches(company?.scenario);
     sanctionsMatches = demoMatches.sanctionsMatches;
     warningMatches = demoMatches.warningMatches;
-    dgTresorState = demoDgTresorState(generatedAt, options.locale);
-    sourcesChecked.push(
-      {
-        sourceName: "DG_TRESOR_GELS",
-        status: "success",
-        mode: "demo",
-        checkedAt: generatedAt,
-        notes: dictionary.sourceNotes.demoScreening,
-        freshness: "fresh",
-      },
-      {
-        sourceName: "AMF_BLACKLIST",
-        status: "success",
-        mode: "demo",
-        checkedAt: generatedAt,
-        notes: dictionary.sourceNotes.demoScreening,
-      },
-    );
+    dgTresorState =
+      company?.scenario === "source_timeout"
+        ? buildDgTresorState({
+            status: "failed",
+            freshness: "unknown",
+            message: "Demo degraded state: DG Tresor source timeout simulation.",
+          })
+        : demoDgTresorState(generatedAt, options.locale);
+
+    if (company?.scenario === "source_timeout") {
+      sourcesChecked.push(
+        {
+          sourceName: "DG_TRESOR_GELS",
+          status: "failed",
+          mode: "demo",
+          checkedAt: generatedAt,
+          error: "Demo degraded state: DG Tresor source timeout simulation.",
+          freshness: "unknown",
+        },
+        {
+          sourceName: "AMF_BLACKLIST",
+          status: "success",
+          mode: "demo",
+          checkedAt: generatedAt,
+          notes: dictionary.sourceNotes.demoScreening,
+        },
+      );
+    } else if (company?.scenario === "stale_cached") {
+      sourcesChecked.push(
+        {
+          sourceName: "DG_TRESOR_GELS",
+          status: "success",
+          mode: "snapshot",
+          checkedAt: "2026-02-01T00:00:00.000Z",
+          notes: "Demo degraded state: stale local snapshot metadata.",
+          freshness: "very_stale",
+        },
+        {
+          sourceName: "AMF_BLACKLIST",
+          status: "success",
+          mode: "demo",
+          checkedAt: generatedAt,
+          notes: dictionary.sourceNotes.demoScreening,
+        },
+      );
+    } else {
+      sourcesChecked.push(
+        {
+          sourceName: "DG_TRESOR_GELS",
+          status: "success",
+          mode: "demo",
+          checkedAt: generatedAt,
+          notes: dictionary.sourceNotes.demoScreening,
+          freshness: "fresh",
+        },
+        {
+          sourceName: "AMF_BLACKLIST",
+          status: "success",
+          mode: "demo",
+          checkedAt: generatedAt,
+          notes: dictionary.sourceNotes.demoScreening,
+        },
+      );
+    }
   } else if (company && env.enableExternalApiCalls) {
     const [sanctions, warnings] = await Promise.all([
       screenSanctions({
@@ -194,25 +317,20 @@ export async function runPrecheck(
     sourcesChecked,
     locale: options.locale,
   });
-  const riskScore = calculateRiskScore(redFlags);
-  const resultWithoutReport: Omit<KycPrecheckResult, "reportMarkdown"> = {
-    identifier,
-    company,
-    riskLevel: deriveRiskLevel(riskScore),
-    riskScore,
-    redFlags,
-    sanctionsMatches,
-    warningMatches,
-    dgTresorState,
-    sourcesChecked,
-    generatedAt,
-    isDemo: companyResolution.isDemo,
-  };
-
-  return {
-    ...resultWithoutReport,
-    reportMarkdown: generateReportMarkdown(resultWithoutReport, options.locale),
-  };
+  return finalizeResult(
+    {
+      identifier,
+      company,
+      redFlags,
+      sanctionsMatches,
+      warningMatches,
+      dgTresorState,
+      sourcesChecked,
+      generatedAt,
+      isDemo: companyResolution.isDemo,
+    },
+    options.locale,
+  );
 }
 
 export function getDemoPrecheckIdentifiers() {

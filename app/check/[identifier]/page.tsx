@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { CompanyIdentityCard } from "@/components/company-identity-card";
+import { DataModeBanner } from "@/components/data-mode-banner";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 import { ErrorState } from "@/components/error-state";
 import { RedFlagsTable } from "@/components/red-flags-table";
 import { ReportPreview } from "@/components/report-preview";
+import { ReviewOutcomeCard } from "@/components/review-outcome-card";
+import { RiskScoreBreakdown } from "@/components/risk-score-breakdown";
 import { RiskSummaryCard } from "@/components/risk-summary-card";
 import { ScreeningCard } from "@/components/screening-card";
-import { SourcesChecked } from "@/components/sources-checked";
+import { SourceTransparencyTable } from "@/components/source-transparency-table";
 import { runPrecheck } from "@/lib/kyc/run-precheck";
 import { getCurrentDictionary } from "@/lib/i18n/server";
 
@@ -36,6 +39,12 @@ export default async function CheckPage({ params }: CheckPageProps) {
         ) : null}
       </div>
 
+      <DataModeBanner
+        mode={result.dataMode}
+        checkedAt={new Date(result.generatedAt).toLocaleString(dictionary.riskSummary.dateLocale)}
+        labels={dictionary.dataMode}
+      />
+
       <DisclaimerBanner labels={dictionary.disclaimer} />
 
       {!result.identifier.isValid ? (
@@ -47,6 +56,7 @@ export default async function CheckPage({ params }: CheckPageProps) {
 
       <div className="print-surface grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <section className="min-w-0 space-y-6">
+          <ReviewOutcomeCard outcome={result.reviewOutcome} labels={dictionary.reviewOutcome} />
           <CompanyIdentityCard
             company={result.company}
             identifier={result.identifier}
@@ -73,12 +83,10 @@ export default async function CheckPage({ params }: CheckPageProps) {
               labels={dictionary.screeningCard}
             />
           </div>
-          <SourcesChecked
-            sources={result.sourcesChecked}
+          <SourceTransparencyTable
+            sources={result.sourceChecks}
             labels={dictionary.sourcesChecked}
-            statusLabels={dictionary.badges.sourceStatuses}
-            modeLabels={dictionary.badges.sourceModes}
-            freshnessLabels={dictionary.badges.freshness}
+            statusLabels={dictionary.badges.sourceCheckStatuses}
           />
         </section>
 
@@ -88,7 +96,13 @@ export default async function CheckPage({ params }: CheckPageProps) {
             labels={dictionary.riskSummary}
             riskLabels={dictionary.badges.riskLevels}
           />
-          <ReportPreview markdown={result.reportMarkdown} labels={dictionary.reportPreview} />
+          <RiskScoreBreakdown risk={result.risk} labels={dictionary.riskBreakdown} />
+          <ReportPreview
+            markdown={result.reportMarkdown}
+            evidencePayload={result.evidencePayload}
+            escalationMemo={result.escalationMemo}
+            labels={dictionary.reportPreview}
+          />
         </aside>
       </div>
     </main>

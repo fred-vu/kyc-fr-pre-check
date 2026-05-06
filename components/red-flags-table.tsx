@@ -30,26 +30,32 @@ export function RedFlagsTable({
         </div>
       ) : (
         <div className="max-w-full overflow-x-auto">
-          <table className="min-w-[720px] divide-y divide-line text-left text-sm">
+          <table className="min-w-[980px] divide-y divide-line text-left text-sm">
             <thead>
               <tr className="text-xs uppercase tracking-[0.05em] text-muted">
                 <th className="whitespace-nowrap py-3 pr-4 font-medium">{labels.severity}</th>
                 <th className="whitespace-nowrap px-4 py-3 font-medium">{labels.flag}</th>
-                <th className="min-w-64 px-4 py-3 font-medium">{labels.description}</th>
+                <th className="min-w-64 px-4 py-3 font-medium">{labels.evidence}</th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium">{labels.source}</th>
+                <th className="whitespace-nowrap px-4 py-3 text-right font-medium">{labels.scoreContribution}</th>
                 <th className="min-w-64 pl-4 py-3 font-medium">{labels.recommendation}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {flags.map((flag) => (
-                <tr key={`${flag.code}-${flag.source}`}>
+                <tr key={`${flag.id}-${flag.source}`}>
                   <td className="py-4 pr-4 align-top">
                     <span className={`rounded-sm border px-2 py-1 text-xs font-medium uppercase tracking-[0.05em] ${severityStyles[flag.severity]}`}>
                       {severityLabels[flag.severity]}
                     </span>
                   </td>
                   <td className="px-4 py-4 align-top font-medium text-ink">{flag.label}</td>
-                  <td className="px-4 py-4 align-top leading-6 text-muted">{flag.description}</td>
-                  <td className="pl-4 py-4 align-top leading-6 text-muted">{flag.recommendation}</td>
+                  <td className="px-4 py-4 align-top leading-6 text-muted">{flag.evidence}</td>
+                  <td className="px-4 py-4 align-top leading-6 text-muted">{flag.source}</td>
+                  <td className="px-4 py-4 text-right align-top tabular-nums text-muted">
+                    {flag.scoreContribution}
+                  </td>
+                  <td className="pl-4 py-4 align-top leading-6 text-muted">{flag.recommendedAction}</td>
                 </tr>
               ))}
             </tbody>

@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { ArrowRight, Database, FileText, ShieldCheck } from "lucide-react";
 import { CompanySearchForm } from "@/components/company-search-form";
+import { DataModeBanner } from "@/components/data-mode-banner";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 import { getCurrentDictionary } from "@/lib/i18n/server";
+import { env } from "@/lib/utils/env";
 
 export default async function HomePage() {
   const { dictionary } = await getCurrentDictionary();
   const icons = [Database, ShieldCheck, FileText];
+  const dataMode = env.enableExternalApiCalls ? "hybrid" : "demo";
 
   return (
     <main className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 sm:py-section lg:grid-cols-[1fr_420px] lg:px-12">
@@ -39,6 +42,7 @@ export default async function HomePage() {
           })}
         </div>
 
+        <DataModeBanner mode={dataMode} labels={dictionary.dataMode} />
         <DisclaimerBanner labels={dictionary.disclaimer} />
       </section>
 

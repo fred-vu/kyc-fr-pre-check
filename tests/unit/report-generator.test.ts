@@ -7,6 +7,9 @@ describe("report generation", () => {
 
     expect(result.reportMarkdown).toContain("# French Company KYC Pre-Check Report");
     expect(result.reportMarkdown).toContain("Hexa Services Demo SAS");
+    expect(result.reportMarkdown).toContain("## Case Metadata");
+    expect(result.reportMarkdown).toContain("## Score Breakdown");
+    expect(result.reportMarkdown).toContain("## Sources Checked");
     expect(result.reportMarkdown).toContain("Disclaimer");
   });
 
@@ -15,6 +18,8 @@ describe("report generation", () => {
 
     expect(result.reportMarkdown).toContain("# Rapport de pré-contrôle KYC entreprise française");
     expect(result.reportMarkdown).toContain("Hexa Services Demo SAS");
+    expect(result.reportMarkdown).toContain("## Métadonnées du dossier");
+    expect(result.reportMarkdown).toContain("## Décomposition du score");
     expect(result.reportMarkdown).toContain("Clause de non-responsabilité");
   });
 });

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Building2 } from "lucide-react";
 import { demoCompanies } from "@/lib/demo/companies";
+import { DataModeBanner } from "@/components/data-mode-banner";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
 import { RiskBadge } from "@/components/risk-badge";
 import { runPrecheck } from "@/lib/kyc/run-precheck";
@@ -23,6 +24,12 @@ export default async function DemoPage() {
           {dictionary.demo.backToSearch}
         </Link>
       </div>
+
+      <DataModeBanner
+        mode="demo"
+        checkedAt={new Date(results[0]?.generatedAt ?? Date.now()).toLocaleString(dictionary.riskSummary.dateLocale)}
+        labels={dictionary.dataMode}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
         {results.map((result) => (

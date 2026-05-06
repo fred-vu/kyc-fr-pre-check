@@ -1,6 +1,6 @@
-import type { RedFlagCode, RiskLevel } from "@/types/risk";
+import type { RedFlagCode, ReviewOutcome, RiskLevel } from "@/types/risk";
 import type { DgTresorFreshness } from "@/types/screening";
-import type { SourceMode, SourceStatus } from "@/types/source";
+import type { DataMode, SourceCheckStatus, SourceMode, SourceStatus } from "@/types/source";
 import { defaultLocale, type Locale, normalizeLocale } from "./config";
 
 type RedFlagCopy = {
@@ -43,6 +43,13 @@ type Dictionary = {
   disclaimer: {
     paragraphs: string[];
   };
+  dataMode: {
+    eyebrow: string;
+    title: string;
+    modes: Record<DataMode, string>;
+    descriptions: Record<DataMode, string>;
+    checkedAt: string;
+  };
   demo: {
     eyebrow: string;
     title: string;
@@ -83,8 +90,13 @@ type Dictionary = {
     empty: string;
     severity: string;
     flag: string;
+    category: string;
     description: string;
+    evidence: string;
+    source: string;
+    scoreContribution: string;
     recommendation: string;
+    manualReview: string;
   };
   riskSummary: {
     eyebrow: string;
@@ -96,6 +108,23 @@ type Dictionary = {
     generatedAt: string;
     dateLocale: string;
     generateFullPdf: string;
+  };
+  reviewOutcome: {
+    eyebrow: string;
+    labels: Record<ReviewOutcome, string>;
+    descriptions: Record<ReviewOutcome, string>;
+  };
+  riskBreakdown: {
+    eyebrow: string;
+    title: string;
+    model: string;
+    thresholds: string;
+    capped: string;
+    notCapped: string;
+    contributions: string;
+    indicator: string;
+    points: string;
+    noContributions: string;
   };
   screeningCard: {
     eyebrow: string;
@@ -113,6 +142,9 @@ type Dictionary = {
     notes: string;
     checked: string;
     noSources: string;
+    checkedAt: string;
+    confidence: string;
+    provider: string;
   };
   reportPreview: {
     eyebrow: string;
@@ -120,6 +152,9 @@ type Dictionary = {
     copy: string;
     copied: string;
     print: string;
+    downloadJson: string;
+    copyEscalationMemo: string;
+    copiedEscalationMemo: string;
   };
   errors: {
     globalTitle: string;
@@ -138,10 +173,16 @@ type Dictionary = {
     riskLevels: Record<RiskLevel, string>;
     sourceStatuses: Record<SourceStatus, string>;
     sourceModes: Record<SourceMode, string>;
-    freshness: Record<DgTresorFreshness, string>;
+      freshness: Record<DgTresorFreshness, string>;
+      sourceCheckStatuses: Record<SourceCheckStatus, string>;
   };
   report: {
     title: string;
+    caseMetadata: string;
+    caseId: string;
+    inputIdentifier: string;
+    dataMode: string;
+    reviewOutcome: string;
     companyIdentity: string;
     legalName: string;
     legalForm: string;
@@ -154,12 +195,19 @@ type Dictionary = {
     indicativeRiskLevel: string;
     riskScore: string;
     rawAdditiveScore: string;
+    scoringModel: string;
+    displayedScoreCapped: string;
     generatedAt: string;
     keyFindings: string;
     noMajorFinding: string;
+    scoreBreakdown: string;
+    indicator: string;
+    points: string;
     redFlags: string;
     severity: string;
     flag: string;
+    evidence: string;
+    source: string;
     description: string;
     recommendedAction: string;
     noMajorIndicatorRow: string;
@@ -176,6 +224,13 @@ type Dictionary = {
     dgRecordCount: string;
     dgNotes: string;
     sourcesChecked: string;
+    provider: string;
+    mode: string;
+    sourceStatus: string;
+    checkedAt: string;
+    confidence: string;
+    notes: string;
+    recommendedActions: string;
     noSourceChecked: string;
     disclaimerTitle: string;
     disclaimer: string;
@@ -416,6 +471,25 @@ export const dictionaries: Record<Locale, Dictionary> = {
         "This application is a portfolio project and an operational pre-check prototype. It does not provide legal, regulatory, AML, sanctions, or compliance advice.",
       ],
     },
+    dataMode: {
+      eyebrow: "Data mode",
+      title: "Source transparency",
+      modes: {
+        demo: "Demo fixture",
+        live: "Live public-source check",
+        hybrid: "Hybrid source check",
+        cached: "Cached snapshot check",
+        unavailable: "Source unavailable",
+      },
+      descriptions: {
+        demo: "This result is generated from deterministic fictional test data. It is intended for product demonstration only and must not be used for real onboarding decisions.",
+        live: "This result was generated using available public-source company and screening data. Source availability may vary. Manual compliance review is still required.",
+        hybrid: "This result combines live public-source data with local or cached snapshots. Review source status before relying on the result.",
+        cached: "This result uses a local or cached source snapshot. Check the source freshness before using it for review.",
+        unavailable: "The app could not complete the required source checks. Retry the check or verify the company manually.",
+      },
+      checkedAt: "Checked at",
+    },
     demo: {
       eyebrow: "Stable fixtures",
       title: "Demo companies",
@@ -456,8 +530,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
       empty: "No major indicator was generated by this pre-check.",
       severity: "Severity",
       flag: "Flag",
+      category: "Category",
       description: "Description",
+      evidence: "Evidence",
+      source: "Source",
+      scoreContribution: "Points",
       recommendation: "Recommended action",
+      manualReview: "Manual review",
     },
     riskSummary: {
       eyebrow: "Risk summary",
@@ -469,6 +548,34 @@ export const dictionaries: Record<Locale, Dictionary> = {
       generatedAt: "Generated at",
       dateLocale: "en-GB",
       generateFullPdf: "Generate full PDF",
+    },
+    reviewOutcome: {
+      eyebrow: "Preliminary review outcome",
+      labels: {
+        PASS_PRE_CHECK: "Pass pre-check",
+        MANUAL_REVIEW_REQUIRED: "Manual review required",
+        ESCALATE_BEFORE_ONBOARDING: "Escalate before onboarding",
+        INSUFFICIENT_DATA: "Insufficient data - verify manually",
+      },
+      descriptions: {
+        PASS_PRE_CHECK: "No major indicator was generated. Continue standard human review before any onboarding decision.",
+        MANUAL_REVIEW_REQUIRED: "At least one indicator requires manual review before proceeding.",
+        ESCALATE_BEFORE_ONBOARDING: "A high-impact indicator was detected. Do not proceed without senior or compliance review.",
+        INSUFFICIENT_DATA: "One or more critical source checks failed or were unavailable. Retry or verify manually.",
+      },
+    },
+    riskBreakdown: {
+      eyebrow: "Scoring model",
+      title: "Risk score breakdown",
+      model:
+        "Deterministic rule-based scoring. Each detected indicator contributes fixed points. The displayed score is capped at 100 and is not a probability or final compliance decision.",
+      thresholds: "0-24 low; 25-49 medium; 50-74 high; 75-100 critical.",
+      capped: "The raw score exceeds 100, so the displayed score is capped.",
+      notCapped: "The displayed score equals the raw additive score.",
+      contributions: "Score contributions",
+      indicator: "Indicator",
+      points: "Points",
+      noContributions: "No scored indicator was generated.",
     },
     screeningCard: {
       eyebrow: "Screening",
@@ -486,6 +593,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
       notes: "Notes",
       checked: "Checked",
       noSources: "No source checked.",
+      checkedAt: "Checked at",
+      confidence: "Confidence",
+      provider: "Provider",
     },
     reportPreview: {
       eyebrow: "Report",
@@ -493,6 +603,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
       copy: "Copy",
       copied: "Copied",
       print: "Print",
+      downloadJson: "Download JSON",
+      copyEscalationMemo: "Copy escalation memo",
+      copiedEscalationMemo: "Memo copied",
     },
     errors: {
       globalTitle: "Something went wrong",
@@ -534,9 +647,25 @@ export const dictionaries: Record<Locale, Dictionary> = {
         very_stale: "very stale",
         unknown: "unknown",
       },
+      sourceCheckStatuses: {
+        success: "success",
+        no_match: "no match",
+        potential_match: "potential match",
+        failed: "failed",
+        timeout: "timeout",
+        unavailable: "unavailable",
+        demo_fixture: "demo fixture",
+        cached: "cached",
+        partial: "partial",
+      },
     },
     report: {
       title: "French Company KYC Pre-Check Report",
+      caseMetadata: "Case Metadata",
+      caseId: "Case ID",
+      inputIdentifier: "Input identifier",
+      dataMode: "Data mode",
+      reviewOutcome: "Preliminary review outcome",
       companyIdentity: "Company Identity",
       legalName: "Legal name",
       legalForm: "Legal form",
@@ -549,12 +678,19 @@ export const dictionaries: Record<Locale, Dictionary> = {
       indicativeRiskLevel: "Indicative risk level",
       riskScore: "Risk score",
       rawAdditiveScore: "Raw additive score",
+      scoringModel: "Scoring model",
+      displayedScoreCapped: "Displayed score capped at 100",
       generatedAt: "Generated at",
       keyFindings: "Key Findings",
       noMajorFinding: "No major indicator was generated by this pre-check.",
+      scoreBreakdown: "Score Breakdown",
+      indicator: "Indicator",
+      points: "Points",
       redFlags: "Red Flags",
       severity: "Severity",
       flag: "Flag",
+      evidence: "Evidence",
+      source: "Source",
       description: "Description",
       recommendedAction: "Recommended action",
       noMajorIndicatorRow: "No major indicator",
@@ -571,6 +707,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
       dgRecordCount: "DG Tresor record count",
       dgNotes: "DG Tresor notes",
       sourcesChecked: "Sources Checked",
+      provider: "Provider",
+      mode: "Mode",
+      sourceStatus: "Status",
+      checkedAt: "Checked at",
+      confidence: "Confidence",
+      notes: "Notes",
+      recommendedActions: "Recommended Actions",
       noSourceChecked: "No source checked.",
       disclaimerTitle: "Disclaimer",
       disclaimer:
@@ -648,6 +791,25 @@ export const dictionaries: Record<Locale, Dictionary> = {
         "Cette application est un projet portfolio et un prototype de pré-vérification opérationnelle. Elle ne fournit pas de conseil juridique, réglementaire, AML, sanctions ou conformité.",
       ],
     },
+    dataMode: {
+      eyebrow: "Mode de données",
+      title: "Transparence des sources",
+      modes: {
+        demo: "Fixture de démo",
+        live: "Contrôle source publique live",
+        hybrid: "Contrôle hybride",
+        cached: "Contrôle snapshot cache",
+        unavailable: "Source indisponible",
+      },
+      descriptions: {
+        demo: "Ce résultat est généré à partir de données fictives déterministes. Il est destiné uniquement à la démonstration produit et ne doit pas être utilisé pour une décision réelle d'entrée en relation.",
+        live: "Ce résultat utilise les données publiques disponibles. La disponibilité des sources peut varier. Une revue conformité manuelle reste nécessaire.",
+        hybrid: "Ce résultat combine des données publiques live avec des snapshots locaux ou mis en cache. Vérifiez le statut des sources avant de l'utiliser.",
+        cached: "Ce résultat utilise un snapshot local ou mis en cache. Vérifiez la fraîcheur de la source avant la revue.",
+        unavailable: "L'application n'a pas pu compléter les contrôles de sources requis. Réessayez ou vérifiez l'entreprise manuellement.",
+      },
+      checkedAt: "Contrôlé le",
+    },
     demo: {
       eyebrow: "Jeux de données stables",
       title: "Entreprises de démonstration",
@@ -688,8 +850,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
       empty: "Aucun indicateur majeur n'a été généré par ce pré-contrôle.",
       severity: "Sévérité",
       flag: "Alerte",
+      category: "Catégorie",
       description: "Description",
+      evidence: "Preuve",
+      source: "Source",
+      scoreContribution: "Points",
       recommendation: "Action recommandée",
+      manualReview: "Revue manuelle",
     },
     riskSummary: {
       eyebrow: "Synthèse du risque",
@@ -701,6 +868,34 @@ export const dictionaries: Record<Locale, Dictionary> = {
       generatedAt: "Généré le",
       dateLocale: "fr-FR",
       generateFullPdf: "Générer le PDF complet",
+    },
+    reviewOutcome: {
+      eyebrow: "Orientation préliminaire",
+      labels: {
+        PASS_PRE_CHECK: "Pré-contrôle passé",
+        MANUAL_REVIEW_REQUIRED: "Revue manuelle requise",
+        ESCALATE_BEFORE_ONBOARDING: "Escalader avant l'entrée en relation",
+        INSUFFICIENT_DATA: "Données insuffisantes - vérifier manuellement",
+      },
+      descriptions: {
+        PASS_PRE_CHECK: "Aucun indicateur majeur n'a été généré. Poursuivre la revue humaine standard avant toute décision.",
+        MANUAL_REVIEW_REQUIRED: "Au moins un indicateur nécessite une revue manuelle avant de poursuivre.",
+        ESCALATE_BEFORE_ONBOARDING: "Un indicateur à fort impact a été détecté. Ne pas poursuivre sans revue senior ou conformité.",
+        INSUFFICIENT_DATA: "Une ou plusieurs sources critiques ont échoué ou sont indisponibles. Réessayez ou vérifiez manuellement.",
+      },
+    },
+    riskBreakdown: {
+      eyebrow: "Modèle de scoring",
+      title: "Décomposition du score",
+      model:
+        "Scoring déterministe basé sur des règles. Chaque indicateur détecté ajoute un nombre fixe de points. Le score affiché est plafonné à 100 et n'est ni une probabilité ni une décision conformité finale.",
+      thresholds: "0-24 faible ; 25-49 moyen ; 50-74 élevé ; 75-100 critique.",
+      capped: "Le score brut dépasse 100, le score affiché est donc plafonné.",
+      notCapped: "Le score affiché correspond au score additif brut.",
+      contributions: "Contributions au score",
+      indicator: "Indicateur",
+      points: "Points",
+      noContributions: "Aucun indicateur scoré n'a été généré.",
     },
     screeningCard: {
       eyebrow: "Screening",
@@ -718,6 +913,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
       notes: "Notes",
       checked: "Contrôlée",
       noSources: "Aucune source contrôlée.",
+      checkedAt: "Contrôlé le",
+      confidence: "Confiance",
+      provider: "Fournisseur",
     },
     reportPreview: {
       eyebrow: "Rapport",
@@ -725,6 +923,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
       copy: "Copier",
       copied: "Copié",
       print: "Imprimer",
+      downloadJson: "Télécharger JSON",
+      copyEscalationMemo: "Copier la note d'escalade",
+      copiedEscalationMemo: "Note copiée",
     },
     errors: {
       globalTitle: "Une erreur est survenue",
@@ -767,9 +968,25 @@ export const dictionaries: Record<Locale, Dictionary> = {
         very_stale: "très ancien",
         unknown: "inconnu",
       },
+      sourceCheckStatuses: {
+        success: "succès",
+        no_match: "aucune correspondance",
+        potential_match: "correspondance potentielle",
+        failed: "échec",
+        timeout: "timeout",
+        unavailable: "indisponible",
+        demo_fixture: "fixture démo",
+        cached: "cache",
+        partial: "partiel",
+      },
     },
     report: {
       title: "Rapport de pré-contrôle KYC entreprise française",
+      caseMetadata: "Métadonnées du dossier",
+      caseId: "ID dossier",
+      inputIdentifier: "Identifiant soumis",
+      dataMode: "Mode de données",
+      reviewOutcome: "Orientation préliminaire",
       companyIdentity: "Identité de l'entreprise",
       legalName: "Dénomination",
       legalForm: "Forme juridique",
@@ -782,12 +999,19 @@ export const dictionaries: Record<Locale, Dictionary> = {
       indicativeRiskLevel: "Niveau de risque indicatif",
       riskScore: "Score de risque",
       rawAdditiveScore: "Score additif brut",
+      scoringModel: "Modèle de scoring",
+      displayedScoreCapped: "Score affiché plafonné à 100",
       generatedAt: "Généré le",
       keyFindings: "Constats clés",
       noMajorFinding: "Aucun indicateur majeur n'a été généré par ce pré-contrôle.",
+      scoreBreakdown: "Décomposition du score",
+      indicator: "Indicateur",
+      points: "Points",
       redFlags: "Alertes",
       severity: "Sévérité",
       flag: "Alerte",
+      evidence: "Preuve",
+      source: "Source",
       description: "Description",
       recommendedAction: "Action recommandée",
       noMajorIndicatorRow: "Aucun indicateur majeur",
@@ -804,6 +1028,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
       dgRecordCount: "Nombre d'enregistrements DG Trésor",
       dgNotes: "Notes DG Trésor",
       sourcesChecked: "Sources contrôlées",
+      provider: "Fournisseur",
+      mode: "Mode",
+      sourceStatus: "Statut",
+      checkedAt: "Contrôlé le",
+      confidence: "Confiance",
+      notes: "Notes",
+      recommendedActions: "Actions recommandées",
       noSourceChecked: "Aucune source contrôlée.",
       disclaimerTitle: "Clause de non-responsabilité",
       disclaimer:

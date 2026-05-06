@@ -1,24 +1,54 @@
 "use client";
 
 import { useState } from "react";
-import { Clipboard, Printer } from "lucide-react";
+import { Clipboard, FileJson, Printer, ScrollText } from "lucide-react";
 import type { AppDictionary } from "@/lib/i18n/dictionary";
+import type { EvidencePayload } from "@/types/report";
 
 const creditLine = "2026 - from Paris by Fred-Vu - https://github.com/fred-vu";
 
 export function ReportPreview({
   markdown,
+  evidencePayload,
+  escalationMemo,
   labels,
 }: {
   markdown: string;
+  evidencePayload: EvidencePayload;
+  escalationMemo?: string;
   labels: AppDictionary["reportPreview"];
 }) {
   const [copied, setCopied] = useState(false);
+  const [memoCopied, setMemoCopied] = useState(false);
 
   async function copyReport() {
     await navigator.clipboard.writeText(markdown);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
+  }
+
+  async function copyEscalationMemo() {
+    if (!escalationMemo) {
+      return;
+    }
+
+    await navigator.clipboard.writeText(escalationMemo);
+    setMemoCopied(true);
+    window.setTimeout(() => setMemoCopied(false), 1800);
+  }
+
+  function downloadJsonPayload() {
+    const blob = new Blob([JSON.stringify(evidencePayload, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${evidencePayload.caseId}.json`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   }
 
   function printReport() {
@@ -95,6 +125,24 @@ export function ReportPreview({
           <Clipboard className="h-4 w-4" aria-hidden="true" />
           {copied ? labels.copied : labels.copy}
         </button>
+        <button
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-center text-sm font-medium leading-snug text-ink active:bg-panel"
+          type="button"
+          onClick={downloadJsonPayload}
+        >
+          <FileJson className="h-4 w-4" aria-hidden="true" />
+          {labels.downloadJson}
+        </button>
+        {escalationMemo ? (
+          <button
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-center text-sm font-medium leading-snug text-ink active:bg-panel"
+            type="button"
+            onClick={copyEscalationMemo}
+          >
+            <ScrollText className="h-4 w-4" aria-hidden="true" />
+            {memoCopied ? labels.copiedEscalationMemo : labels.copyEscalationMemo}
+          </button>
+        ) : null}
         <button
           className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-center text-sm font-medium leading-snug text-ink active:bg-panel"
           type="button"

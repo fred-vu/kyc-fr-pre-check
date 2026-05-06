@@ -14,6 +14,10 @@ function formatAddress(value: string | undefined, empty: string) {
   return value || empty;
 }
 
+function tableValue(value: string | number | undefined, empty: string) {
+  return `${value ?? empty}`.replace(/\|/g, "\\|").replace(/\n/g, " ");
+}
+
 export function generateReportMarkdown(
   result: Omit<KycPrecheckResult, "reportMarkdown">,
   locale?: Locale,
@@ -27,10 +31,21 @@ export function generateReportMarkdown(
     ? result.redFlags
         .map(
           (flag) =>
-            `| ${dictionary.badges.riskLevels[flag.severity].toUpperCase()} | ${flag.label} | ${flag.description} | ${flag.recommendation} |`,
+            `| ${dictionary.badges.riskLevels[flag.severity].toUpperCase()} | ${tableValue(
+              flag.label,
+              empty,
+            )} | ${tableValue(flag.evidence, empty)} | ${tableValue(flag.source, empty)} | ${
+              flag.scoreContribution
+            } | ${tableValue(flag.recommendedAction, empty)} |`,
         )
         .join("\n")
-    : `| ${dictionary.badges.riskLevels.low.toUpperCase()} | ${labels.noMajorIndicatorRow} | ${labels.noMajorFinding} | ${labels.standardReview} |`;
+    : `| ${dictionary.badges.riskLevels.low.toUpperCase()} | ${labels.noMajorIndicatorRow} | ${labels.noMajorFinding} | ${labels.notAvailable} | 0 | ${labels.standardReview} |`;
+
+  const scoreBreakdown = result.risk.contributions.length
+    ? result.risk.contributions
+        .map((contribution) => `| ${tableValue(contribution.label, empty)} | ${contribution.points} |`)
+        .join("\n")
+    : `| ${labels.noMajorIndicatorRow} | 0 |`;
 
   const sanctionsMatches = result.sanctionsMatches.length
     ? result.sanctionsMatches
@@ -44,14 +59,32 @@ export function generateReportMarkdown(
         .join("\n")
     : `- ${labels.noPotentialMatch}`;
 
-  const sources = result.sourcesChecked
+  const sources = result.sourceChecks
     .map(
       (source) =>
-        `- ${source.sourceName}: ${dictionary.badges.sourceStatuses[source.status]} (${dictionary.badges.sourceModes[source.mode]})${source.error ? ` - ${source.error}` : ""}`,
+        `| ${tableValue(source.label, empty)} | ${tableValue(source.provider, empty)} | ${
+          dictionary.badges.sourceCheckStatuses[source.status]
+        } | ${source.mode} | ${source.checkedAt} | ${source.confidence ?? empty} | ${tableValue(
+          source.details,
+          empty,
+        )} |`,
     )
     .join("\n");
 
+  const recommendedActions = result.redFlags.length
+    ? result.redFlags
+        .filter((flag) => flag.manualReviewRequired || ["high", "critical"].includes(flag.severity))
+        .map((flag, index) => `${index + 1}. ${flag.recommendedAction}`)
+        .join("\n")
+    : `1. ${labels.standardReview}`;
+
   return `# ${labels.title}
+
+## ${labels.caseMetadata}
+- ${labels.caseId}: ${result.caseId}
+- ${labels.inputIdentifier}: ${result.identifier.normalized || result.identifier.raw || empty}
+- ${labels.generatedAt}: ${result.generatedAt}
+- ${labels.dataMode}: ${dictionary.dataMode.modes[result.dataMode]}
 
 ## ${labels.companyIdentity}
 - ${labels.legalName}: ${company?.legalName || empty}
@@ -65,17 +98,25 @@ export function generateReportMarkdown(
 - ${labels.creationDate}: ${formatDate(company?.creationDate, empty)}
 
 ## ${labels.riskSummary}
+- ${labels.reviewOutcome}: ${dictionary.reviewOutcome.labels[result.reviewOutcome]}
 - ${labels.indicativeRiskLevel}: ${dictionary.badges.riskLevels[result.riskLevel].toUpperCase()}
 - ${labels.riskScore}: ${result.riskScore.display}/100
 - ${labels.rawAdditiveScore}: ${result.riskScore.raw}
+- ${labels.displayedScoreCapped}: ${result.riskScore.capped ? "yes" : "no"}
+- ${labels.scoringModel}: ${result.risk.modelDescription}
 - ${labels.generatedAt}: ${result.generatedAt}
+
+## ${labels.scoreBreakdown}
+| ${labels.indicator} | ${labels.points} |
+|---|---:|
+${scoreBreakdown}
 
 ## ${labels.keyFindings}
 ${result.redFlags.length ? result.redFlags.map((flag, index) => `${index + 1}. ${flag.label}`).join("\n") : `1. ${labels.noMajorFinding}`}
 
 ## ${labels.redFlags}
-| ${labels.severity} | ${labels.flag} | ${labels.description} | ${labels.recommendedAction} |
-|---|---|---|---|
+| ${labels.severity} | ${labels.flag} | ${labels.evidence} | ${labels.source} | ${labels.points} | ${labels.recommendedAction} |
+|---|---|---|---|---:|---|
 ${redFlags}
 
 ## ${labels.screeningResults}
@@ -94,7 +135,12 @@ ${warningMatches}
 - ${labels.dgNotes}: ${dgState.message}
 
 ## ${labels.sourcesChecked}
-${sources || `- ${labels.noSourceChecked}`}
+| ${labels.source} | ${labels.provider} | ${labels.sourceStatus} | ${labels.mode} | ${labels.checkedAt} | ${labels.confidence} | ${labels.notes} |
+|---|---|---|---|---|---|---|
+${sources || `| ${labels.noSourceChecked} | ${empty} | ${empty} | ${empty} | ${empty} | ${empty} | ${empty} |`}
+
+## ${labels.recommendedActions}
+${recommendedActions}
 
 ## ${labels.disclaimerTitle}
 ${labels.disclaimer}

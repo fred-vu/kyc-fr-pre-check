@@ -38,5 +38,12 @@ describe("red flags", () => {
         "AMF_WARNING_POTENTIAL_MATCH",
       ]),
     );
+    expect(flags.every((flag) => flag.evidence.length > 0)).toBe(true);
+    expect(flags.every((flag) => flag.source.length > 0)).toBe(true);
+    expect(
+      flags
+        .filter((flag) => ["high", "critical"].includes(flag.severity))
+        .every((flag) => flag.recommendedAction.length > 0),
+    ).toBe(true);
   });
 });

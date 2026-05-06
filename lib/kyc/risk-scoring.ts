@@ -1,4 +1,4 @@
-import type { RedFlag, RedFlagCode, RiskLevel, RiskScore } from "@/types/risk";
+import type { RedFlag, RedFlagCode, RiskLevel, RiskScore, RiskScoreBreakdown } from "@/types/risk";
 
 export const RED_FLAG_WEIGHTS: Record<RedFlagCode, number> = {
   INVALID_IDENTIFIER: 50,
@@ -17,16 +17,24 @@ export const RED_FLAG_WEIGHTS: Record<RedFlagCode, number> = {
 };
 
 export function calculateRiskScore(redFlags: RedFlag[]): RiskScore {
-  const raw = redFlags.reduce((total, flag) => total + RED_FLAG_WEIGHTS[flag.code], 0);
+  const contributions = redFlags.map((flag) => ({
+    flagId: flag.id,
+    label: flag.label,
+    points: flag.scoreContribution,
+  }));
+  const raw = contributions.reduce((total, contribution) => total + contribution.points, 0);
+  const display = Math.min(raw, 100);
 
   return {
     raw,
-    display: Math.min(raw, 100),
+    display,
+    capped: raw > display,
+    contributions,
   };
 }
 
 export function deriveRiskLevel(score: RiskScore): RiskLevel {
-  if (score.raw >= 80) {
+  if (score.raw >= 75) {
     return "critical";
   }
 
@@ -39,4 +47,14 @@ export function deriveRiskLevel(score: RiskScore): RiskLevel {
   }
 
   return "low";
+}
+
+export function buildRiskScoreBreakdown(score: RiskScore): RiskScoreBreakdown {
+  return {
+    ...score,
+    level: deriveRiskLevel(score),
+    thresholdExplanation: "0-24: low; 25-49: medium; 50-74: high; 75-100: critical.",
+    modelDescription:
+      "Deterministic rule-based scoring. Each risk indicator contributes fixed points. The displayed score is capped at 100 and is not a probability or final compliance decision.",
+  };
 }

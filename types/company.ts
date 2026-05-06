@@ -33,5 +33,12 @@ export type CompanyProfile = {
   headOfficeAddress?: Address;
   establishmentAddress?: Address;
   sourceRecords: SourceRecord[];
-  scenario?: "normal_active" | "closed_company" | "inconsistent_sensitive" | "live";
+  scenario?:
+    | "normal_active"
+    | "closed_company"
+    | "inconsistent_sensitive"
+    | "source_timeout"
+    | "stale_cached"
+    | "conflicting_identity"
+    | "live";
 };
