@@ -2,7 +2,9 @@ export type SourceName =
   | "DEMO_FIXTURE"
   | "ANNUAIRE_ENTREPRISES"
   | "DG_TRESOR_GELS"
-  | "AMF_BLACKLIST";
+  | "AMF_BLACKLIST"
+  | "EU_VIES_VAT"
+  | "IBAN_LOCAL_VALIDATION";
 
 export type SourceStatus = "success" | "partial" | "failed" | "not_checked";
 

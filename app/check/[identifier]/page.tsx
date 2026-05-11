@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { AdditionalChecksPanel } from "@/components/additional-checks-panel";
 import { CompanyIdentityCard } from "@/components/company-identity-card";
 import { DataModeBanner } from "@/components/data-mode-banner";
 import { DisclaimerBanner } from "@/components/disclaimer-banner";
@@ -61,6 +62,11 @@ export default async function CheckPage({ params }: CheckPageProps) {
             company={result.company}
             identifier={result.identifier}
             labels={dictionary.companyIdentity}
+          />
+          <AdditionalChecksPanel
+            labels={dictionary.additionalChecks}
+            companySiren={result.company?.siren}
+            dateLocale={dictionary.riskSummary.dateLocale}
           />
           <RedFlagsTable
             flags={result.redFlags}

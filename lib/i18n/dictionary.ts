@@ -132,6 +132,43 @@ type Dictionary = {
     confidence: string;
     potentialMatchLabel: string;
   };
+  additionalChecks: {
+    eyebrow: string;
+    title: string;
+    addButton: string;
+    hideButton: string;
+    vatLabel: string;
+    vatPlaceholder: string;
+    ibanLabel: string;
+    ibanPlaceholder: string;
+    runButton: string;
+    running: string;
+    noInput: string;
+    vatTitle: string;
+    ibanTitle: string;
+    valid: string;
+    invalid: string;
+    unavailable: string;
+    checkedAt: string;
+    source: string;
+    country: string;
+    normalizedVat: string;
+    requestDate: string;
+    registeredName: string;
+    registeredAddress: string;
+    maskedIban: string;
+    checksum: string;
+    sepa: string;
+    yes: string;
+    no: string;
+    errors: string;
+    notes: string;
+    sirenMatch: string;
+    sirenMismatch: string;
+    sirenNotApplicable: string;
+    sirenNotChecked: string;
+    unexpectedError: string;
+  };
   sourcesChecked: {
     eyebrow: string;
     title: string;
@@ -583,6 +620,43 @@ export const dictionaries: Record<Locale, Dictionary> = {
       confidence: "Confidence",
       potentialMatchLabel: "Potential match requiring review",
     },
+    additionalChecks: {
+      eyebrow: "Optional checks",
+      title: "Additional validation",
+      addButton: "Add additional check",
+      hideButton: "Hide additional checks",
+      vatLabel: "VAT number",
+      vatPlaceholder: "FR40552100554",
+      ibanLabel: "IBAN",
+      ibanPlaceholder: "FR76 3000 6000 0112 3456 7890 189",
+      runButton: "Run checks",
+      running: "Checking",
+      noInput: "Enter a VAT number, an IBAN, or both.",
+      vatTitle: "VAT validation",
+      ibanTitle: "IBAN validation",
+      valid: "Valid",
+      invalid: "Invalid",
+      unavailable: "Unavailable",
+      checkedAt: "Checked at",
+      source: "Source",
+      country: "Country",
+      normalizedVat: "Normalized VAT",
+      requestDate: "VIES request date",
+      registeredName: "Registered name",
+      registeredAddress: "Registered address",
+      maskedIban: "Masked IBAN",
+      checksum: "Checksum",
+      sepa: "SEPA zone",
+      yes: "Yes",
+      no: "No",
+      errors: "Errors",
+      notes: "Notes",
+      sirenMatch: "French VAT SIREN suffix matches this company.",
+      sirenMismatch: "French VAT SIREN suffix does not match this company.",
+      sirenNotApplicable: "SIREN cross-check is not applicable.",
+      sirenNotChecked: "SIREN cross-check was not run.",
+      unexpectedError: "The additional check could not be completed.",
+    },
     sourcesChecked: {
       eyebrow: "Sources checked",
       title: "Source status",
@@ -902,6 +976,43 @@ export const dictionaries: Record<Locale, Dictionary> = {
       noMatches: "Aucune correspondance potentielle trouvée dans les données contrôlées.",
       confidence: "Confiance",
       potentialMatchLabel: "Correspondance potentielle nécessitant une revue",
+    },
+    additionalChecks: {
+      eyebrow: "Contrôles optionnels",
+      title: "Validation complémentaire",
+      addButton: "Ajouter un contrôle complémentaire",
+      hideButton: "Masquer les contrôles complémentaires",
+      vatLabel: "Numéro de TVA",
+      vatPlaceholder: "FR40552100554",
+      ibanLabel: "IBAN",
+      ibanPlaceholder: "FR76 3000 6000 0112 3456 7890 189",
+      runButton: "Lancer les contrôles",
+      running: "Contrôle en cours",
+      noInput: "Saisissez un numéro de TVA, un IBAN, ou les deux.",
+      vatTitle: "Validation TVA",
+      ibanTitle: "Validation IBAN",
+      valid: "Valide",
+      invalid: "Invalide",
+      unavailable: "Indisponible",
+      checkedAt: "Contrôlé le",
+      source: "Source",
+      country: "Pays",
+      normalizedVat: "TVA normalisée",
+      requestDate: "Date de requête VIES",
+      registeredName: "Nom enregistré",
+      registeredAddress: "Adresse enregistrée",
+      maskedIban: "IBAN masqué",
+      checksum: "Clé de contrôle",
+      sepa: "Zone SEPA",
+      yes: "Oui",
+      no: "Non",
+      errors: "Erreurs",
+      notes: "Notes",
+      sirenMatch: "Le suffixe SIREN de la TVA française correspond à cette entreprise.",
+      sirenMismatch: "Le suffixe SIREN de la TVA française ne correspond pas à cette entreprise.",
+      sirenNotApplicable: "Le contrôle SIREN n'est pas applicable.",
+      sirenNotChecked: "Le contrôle SIREN n'a pas été lancé.",
+      unexpectedError: "Le contrôle complémentaire n'a pas pu être terminé.",
     },
     sourcesChecked: {
       eyebrow: "Sources contrôlées",

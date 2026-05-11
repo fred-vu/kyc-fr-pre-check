@@ -18,6 +18,14 @@ const sourceLabels: Record<SourceRecord["sourceName"], { label: string; provider
     label: "AMF warning list",
     provider: "AMF / data.gouv.fr",
   },
+  EU_VIES_VAT: {
+    label: "EU VIES VAT validation",
+    provider: "European Commission VIES",
+  },
+  IBAN_LOCAL_VALIDATION: {
+    label: "IBAN local validation",
+    provider: "ibantools",
+  },
 };
 
 function normalizeMode(mode: SourceRecord["mode"]): SourceCheckMode {
